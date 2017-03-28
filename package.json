@@ -1,0 +1,20 @@
+{
+  "name": "CrossfitFelix",
+  "version": "1.0.0",
+  "description": "CrossfitFelix",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "alexa",
+    "skill",
+    "crossfit",
+    "felix"
+  ],
+  "author": "Nick Peters",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "alexa-sdk": "^1.0.6"
+  }
+}

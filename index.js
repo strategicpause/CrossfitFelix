@@ -6,16 +6,20 @@ var TIME = 'Time';
 var TIME_KEY = '%t';
 
 // Messages
-var HELP_MESSAGE = 'Try asking for today or tomorrows workout. You can also ask for announcements.';
-var UNHANDLED_MESSAGE = 'I didn\'t recognize that command. Try instead asking for today\'s workout.';
+var HELP_MESSAGE = 'To hear the work out of the day, try asking for today or tomorrows workout. ' + 
+				   'You can also ask for announcements to hear todays announcements. What would you like to do?';
+var REPROMPT_MESSAGE = 'Would you like to hear today or tomorrows workout or would you like to hear todays announcements?';
+var UNHANDLED_MESSAGE = 'Sorry, I didnt recognize that command. ' + REPROMPT_MESSAGE;
 var WORKOUT_ERROR = 'The workout has not yet been posted. Check back later.';
 var ANNOUNCEMENT_ERROR = 'There are no announcements today. Check back later.';
+var WELCOME_MESSAGE = 'Welcome to Crossfit Felix. ' + REPROMPT_MESSAGE;
+var STOP_MESSAGE = 'Goodbye!';
 
 // Config
 var APP_ID = 'amzn1.ask.skill.1959573a-c819-4e46-9e4b-b0fb16d726cbs';
 
 exports.handler = (event, context, callback) => {
-    var alexa = Alexa.handler(event, context);
+    var alexa = Alexa.handler(event, context);	
     
     alexa.APP_ID = APP_ID;
     alexa.registerHandlers(handlers);
@@ -23,6 +27,10 @@ exports.handler = (event, context, callback) => {
 };
 
 var handlers = {
+	'LaunchRequest': function () {
+		console.log('Calling LaunchRequest');
+        this.emit(':ask', WELCOME_MESSAGE, REPROMPT_MESSAGE);
+    },
 	'GetWorkoutForTodayIntent': function() {
 		console.log('Calling GetWorkoutForTodayIntent.');
 		getWorkout(this, dataAccess.TODAY);
@@ -36,16 +44,21 @@ var handlers = {
 		getAnnouncements(this);
 	},
 	'AMAZON.HelpIntent': function () {
-		this.emit(':tell', HELP_MESSAGE);
+		this.emit(':ask', HELP_MESSAGE, REPROMPT_MESSAGE);
 	},
 	'AMAZON.CancelIntent': function () {
-		this.emit(':tell', this.t("STOP_MESSAGE"));
+		console.log('Calling CancelIntent.');
+		this.emit('SessionEndedRequest');
 	},
 	'AMAZON.StopIntent': function () {
-		this.emit(':tell', this.t("STOP_MESSAGE"));
+		console.log('Calling StopIntent.');
+		this.emit('SessionEndedRequest');
 	},
+	'SessionEndedRequest':function () {
+        this.emit(':tell', STOP_MESSAGE);
+    },
 	'Unhandled': function () {
-        this.emit(':tell', UNHANDLED_MESSAGE);
+        this.emit(':ask', UNHANDLED_MESSAGE, REPROMPT_MESSAGE);
     }
 };
 
@@ -71,9 +84,12 @@ var getAnnouncements = function(scope) {
 
 var emitPayload = function(scope, options) {
 	return function(payload) {
+		var readoutText = payload['readoutText'];
 		if (TIME in (options || {})) {
-			payload = payload.replace(TIME_KEY, options[TIME]);
+			readoutText = readoutText.replace(TIME_KEY, options[TIME]);
 		}
-		scope.emit(':tell', payload);
+		var title = payload['title'];
+		var displayText = payload['displayText'];
+		scope.emit(':tellWithCard', readoutText, title, displayText);
 	};
 };

@@ -38,9 +38,8 @@ var getPayload = function(options) {
 	var date = getDate(options.time);
 	console.log('Fetching ' + options.type + ' for ' + date);
 	if (data[options.type] && 
-		data[options.type][date] && 
-		data[options.type][date]['payload']) {
-		var payload = data[options.type][date]['payload'];
+		data[options.type][date]) {
+		var payload = data[options.type][date];
 		console.log('Found payload for ' + options.type + '.' + date);
 		options.onSuccess(payload);
 	} else {
